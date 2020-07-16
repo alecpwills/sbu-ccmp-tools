@@ -1,0 +1,122 @@
+# FDF
+
+# General System descriptors
+
+SystemName water	# Descriptive name of the system
+SystemLabel            nacl           # Short name for naming files
+
+NumberOfAtoms          290            # Number of atoms
+NumberOfSpecies         4            # Number of species
+
+%block Chemical_Species_Label
+  1   11   Na
+  2   17   Cl
+  3   1	   H
+  4   8	   O
+%endblock Chemical_Species_Label
+
+
+# Lattice, coordinates, k-sampling
+
+AtomicCoordinatesFormat Ang # Format for coordinates
+AtomicCoorFormatOut     Ang
+
+%block AtomicCoordinatesAndAtomicSpecies < NaCl.xyz
+
+LatticeConstant     14.373 Ang
+
+%block LatticeVectors
+  1 0 0
+  0 1 0
+  0 0 1
+%endblock LatticeVectors
+
+PAO.BasisSize DZP
+PAO.BasisType split
+PAO.EnergyShift 0.01 eV
+PAO.SplitNorm 0.15
+PAO.SoftDefault .true.
+PAO.SoftInnerRadius 0.9
+PAO.SoftPotential 1 eV
+
+%Block PAO.Basis
+O    3     -0.24233
+n=2   0   2   E    23.36061     3.39721
+     4.50769     2.64066
+     1.00000     1.00000
+n=2   1   2   E     2.78334     5.14253
+     6.14996     2.59356
+     1.00000     1.00000
+n=3   2   1   E    63.98188     0.16104
+     3.54403
+     1.00000
+H    2      0.46527
+n=1   0   2   E    99.93138     2.59932
+     4.20357     1.84463
+     1.00000     1.00000
+n=2   1   1   E    24.56504     2.20231
+     3.52816
+     1.00000
+%EndBlock PAO.Basis
+
+# DFT, Grid, SCF
+
+XC.functional           GGA         # Exchange-correlation functional type
+XC.authors              PBE          # Particular parametrization of xc func
+SpinPolarized           .false.     # Spin unpolarized calculation
+MeshCutoff              300. Ry     # Equivalent planewave cutoff for the grid
+MaxSCFIterations        100         # Maximum number of SCF iterations per step
+DM.MixingWeight         0.3         # New DM amount for next SCF cycle
+DM.Tolerance            1.d-4       # Tolerance in maximum difference
+                                    # between input and output DM
+DM.NumberPulay          3           # Number of SCF steps between pulay mixing
+
+%block Geometry.Constraints
+molecule [1, 2]
+%endblock Geometry.Constraints
+
+
+# Molecular dynamics and relaxations
+MD.TypeOfRun            FC
+MD.InitialTimeStep	1
+MD.FinalTimeStep	7000   #continuing the earlier runs
+MD.LengthTimeStep	0.5 fs
+MD.InitialTemperature 	298.15 K
+
+# Eigenvalue problem: order-N or diagonalization
+
+SolutionMethod          diagon      # OrderN or Diagon
+ElectronicTemperature   5 K        # Temp. for Fermi smearing
+
+# Output options
+
+WriteCoorInitial	.true.
+WriteCoorStep       	.true.
+WriteForces         	.true.
+WriteKpoints            .false.
+WriteEigenvalues        .true.
+WriteKbands             .false.
+WriteBands              .false.
+WriteCoorXmol           .false.
+WriteMDCoorXmol         .false.
+WriteMDXmol		.true.
+WriteMDhistory          .true.
+WriteCoorXmol           .false.
+
+# Options for saving/reading information
+
+DM.UseSaveDM            .true.              # Use DM Continuation files
+MD.UseSaveXV            .true.      # Use stored positions and velocities
+MD.UseSaveCG            .false.      # read CG histroy
+SaveRho			            .true.       # Write valence pseudocharge at the mesh
+SaveDeltaRho            .true.       # Write RHOscf-RHOatm at the mesh
+SaveRhoXC               .true.
+SaveElectrostaticPotential .true.   # Write the total elect. pot. at the mesh
+SaveTotalPotential      .true.      # Write the total pot. at the mesh
+WriteSiestaDim          .false.      # Write minimum dim to siesta.h and stop
+WriteDenchar            .true.             # Write information for DENCHAR
+#WriteMullikenPop	3	     #at/orb/ chg, at overlap, orb over pops
+SaveIonicCharge		      .true.
+SaveTotalCharge	      	.true.
+SaveBaderCharge		      .true.
+COOP.Write              .true.

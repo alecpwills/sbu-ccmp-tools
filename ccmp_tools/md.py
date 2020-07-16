@@ -100,7 +100,7 @@ class SiestaSimulation(Simulation):
         #if fdf found, can specify numerous things about the simulation
         if self.fdf:
             # TODO: expand data read in, add functionality for user input keys to .get()
-            self.simlabel = self.fdf.get("SimulationLabel")
+            self.simlabel = self.fdf.get("SystemLabel")
             self.latticeconstant = self.fdf.get('LatticeConstant')
             self.latticevectors = np.array([float(v) for i in self.fdf.get("LatticeVectors") for v in i.split()]).reshape(3,3)
             self.dt = self.fdf.get('MD.LengthTimeStep')
@@ -176,6 +176,8 @@ class SiestaSimulation(Simulation):
         else:
             self.universe = MD.Universe(self.anip, topology_format='xyz',
                                         format='xyz', dt=0.5)
+            #change from default ps to fs units
+            self.universe.trajectory.units['time'] = 'fs'
             #populate default assumptions
             self.simtype = "md"
             self.mdtype = "verlet"
@@ -195,7 +197,9 @@ class SiestaSimulation(Simulation):
                 cell_size = max(maxs) - min(mins)
                 #set size to 10% greater than max-min of coordinates, cubic
                 self.universe.dimensions = 3*[cell_size*1.1] + 3*[90]
-                    
+        self.speclst = self.universe.atoms
+
+        
     def iMDE(self, mde=None, fext='.MDE'):
         '''
         Parameters
@@ -222,5 +226,4 @@ class SiestaSimulation(Simulation):
         self._filefind(mde, fext, 'mdep')
         #make sure there is one
         assert self.mdep, '{} file not found in simulation directory.'.format(fext)
-        self.mde = np.loadtxt(os.path.join(self.path, self.mdep),
-                              comments='#')
+        self.mde = np.loadtxt(self.mdep, comments='#')
